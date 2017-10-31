@@ -1,0 +1,19 @@
+{
+  "name": "redisearchclient",
+  "version": "1.0.0",
+  "description": "Client library to abstract RediSearch commands",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kyle J. Davis",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "redis-redisearch": "^1.0.1"
+  },
+  "devDependencies": {
+    "redis": "^2.8.0",
+    "yargs": "^10.0.3"
+  }
+}
