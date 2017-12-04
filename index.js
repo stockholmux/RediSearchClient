@@ -23,7 +23,7 @@ const
     limit       : 'LIMIT',
 
     // node_redis strings
-    mulitConstructor
+    multiConstructor
                 : 'Multi'
   },
   defaultNumberOfResults                                                  // While 10 is the default in RediSearch, we'll always send it for code consistency
@@ -48,7 +48,7 @@ function optionalOptsCbHandler(passedPenultimateArg,passedUltimateArg) {  // Mos
   return out;                                                             // feed it back the (possibly) mutated `out` object
 }
 
-module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// This pattern allows for mulitple instances to be generated but also to have private variables
+module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// This pattern allows for multiple instances to be generated but also to have private variables
   let
     constructorlastArgs = optionalOptsCbHandler(passedOptsOrCb,passedCb), // the options and callback for the entire instantiation
     checked             = false,                                          // Have we checked for bindings
@@ -57,7 +57,7 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
   
   /* internal utility functions */
   const chainer = function(cObj) {                                        // convenience function to consistenty handling function chaining even while in multi                                         
-    return cObj.constructor.name === s.mulitConstructor ?                 // We look if the constructor has a name equal to 'Multi' (although any node_redis pipeline will identify this way)
+    return cObj.constructor.name === s.multiConstructor ?                 // We look if the constructor has a name equal to 'Multi' (although any node_redis pipeline will identify this way)
       cObj : rediSearchObj;                                               // if it is a Multi, then we return that, otherwise we return the original return object of this outer fuction
   }
   const clientCheck = function() {                                        // check for the correct node_redis / RediSearch command bindings
@@ -155,7 +155,7 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
           lastArgs.opts.numberOfResults || defaultNumberOfResults         // numberOfResults or the default number of results (10)
         );
       }
-      if (cObj.constructor.name === s.mulitConstructor) {                 // detect if we're in a pipeline
+      if (cObj.constructor.name === s.multiConstructor) {                 // detect if we're in a pipeline
         cObj.parsers = !cObj.parsers ? {} : cObj.parsers;                 // if so, check if a `parsers` object property exists, if not create one
         cObj.parsers['c'+cObj.queue.length] = parser;                     // push the correct parser into the object at an index 'c'(current index #)
       }
@@ -197,7 +197,7 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
 
       if (!checked) { clientCheck(); }                                    // bindings check
 
-      if (cObj.constructor.name === s.mulitConstructor) {                 // detect if we're in a pipeline
+      if (cObj.constructor.name === s.multiConstructor) {                 // detect if we're in a pipeline
         cObj.parsers = !cObj.parsers ? {} : cObj.parsers;                 // if so, check if a `parsers` object property exists, if not create one
         cObj.parsers['c'+cObj.queue.length] = parser;                     // push the correct parser into the object at an index 'c'(current index #)
       }
