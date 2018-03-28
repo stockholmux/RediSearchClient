@@ -21,6 +21,8 @@ const
     payload     : 'PAYLOAD',
     replace     : 'REPLACE',
     limit       : 'LIMIT',
+    tag         : 'TAG',
+    tagSep      : 'SEPARATOR',
 
     // node_redis strings
     multiConstructor
@@ -264,7 +266,14 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
       return field;                                                       // return the array
     },
     numeric     : genericField(s.numeric),                                // numeric fields 
-    geo         : genericField(s.geo)                                     // geo fields
+    geo         : genericField(s.geo),                                    // geo fields,
+    tag         : function(name, fieldOpts) {
+      let field = [name, s.tag];
+      if (fieldOpts && fieldOpts.separator) {
+        field.push(s.tagSep,'"'+fieldOpts.separator+'"');
+      }
+      return field;
+    }
   };
 
   /* setup */
@@ -280,6 +289,13 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
     client.on('ready',constructorlastArgs.cb);                            // then have it called when the client is ready
   }
 
+  const queryBuilder = {
+    field     : function(field, query) {
+      return ['@',field,':',
+      query,
+      ].join('');
+    }
+  };
   return rediSearchObj = {
     createIndex       : createIndex,
     dropIndex         : dropIndex,
@@ -291,7 +307,7 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
     batch             : pipelineFactory('batch'),
     
     fieldDefinition   : fieldDefinition,
-    
+    queryBuilder      : queryBuilder,
     client            : client                                            // the client specified is returned back for easy access (useful if the client created it)
   };
 };
