@@ -289,13 +289,6 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
     client.on('ready',constructorlastArgs.cb);                            // then have it called when the client is ready
   }
 
-  const queryBuilder = {
-    field     : function(field, query) {
-      return ['@',field,':',
-      query,
-      ].join('');
-    }
-  };
   return rediSearchObj = {
     createIndex       : createIndex,
     dropIndex         : dropIndex,
@@ -307,7 +300,6 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
     batch             : pipelineFactory('batch'),
     
     fieldDefinition   : fieldDefinition,
-    queryBuilder      : queryBuilder,
     client            : client                                            // the client specified is returned back for easy access (useful if the client created it)
   };
 };
