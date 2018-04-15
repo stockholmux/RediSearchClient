@@ -4,6 +4,7 @@ const
   rediSearchBindings  = require('redis-redisearch'),                      // supplies node_redis with the extended RediSearch commands
   s                   = {                                                 // Static strings are declared here to prevent retyping and typos
     // RediSearch strings
+    noContent   : 'NOCONTENT',
     noOffsets   : 'NOOFFSETS',
     noFields    : 'NOFIELDS',
     noFreqs     : 'NOFREQS',
@@ -88,15 +89,25 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
       let
         totalResults = results[0];                                        // first one is just the number of results as returned by RediSearch
       
-      results = _(results.slice(1))                                       // all of the commands past the first one are pushed into lodash
-        .chunk(2)                                                         // docIds and documents are interleaved (multi bulk)
-        .map(function(aResult) {                                          // convert the array pairs into meaniful objects
-          return {
-            docId     : aResult[0],                                       // first element is the docId
-            doc       : deinterleave(aResult[1])                          // second element is the document, but we need to deinterleave it
-          };
-        })
-        .value();                                                         // return the plain object value over the lodash chainable
+      if (opts.noContent === true) {
+        results = _(results.slice(1))
+          .map(function(aResult) {
+            return {
+              docId     : aResult
+            }
+          })
+          .value();
+      } else {
+        results = _(results.slice(1))                                       // all of the commands past the first one are pushed into lodash
+          .chunk(2)                                                         // docIds and documents are interleaved (multi bulk)
+          .map(function(aResult) {                                          // convert the array pairs into meaniful objects
+            return {
+              docId     : aResult[0],                                       // first element is the docId
+              doc       : deinterleave(aResult[1])                          // second element is the document, but we need to deinterleave it
+            };
+          })
+          .value();                                                         // return the plain object value over the lodash chainable
+        }
 
       return {
         results       : results,                                          // results of the search
@@ -150,6 +161,12 @@ module.exports = function(clientOrNodeRedis,key,passedOptsOrCb,passedCb) {// Thi
       if (!checked) { clientCheck(); }                                    // bindings check
       
       searchArgs.push(queryString);
+
+      if (lastArgs.opts.noContent) {
+        searchArgs.push(
+          s.noContent
+        );
+      }
       if (lastArgs.opts.offset || lastArgs.opts.numberOfResults) {        // if we have an offset or number of results..
         searchArgs.push(                                                  // then push in a limit clause
           s.limit,                                                        // 'LIMIT'
